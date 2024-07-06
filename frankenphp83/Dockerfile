@@ -2,6 +2,12 @@ FROM dunglas/frankenphp:1.2.0-php8.3.8-alpine
 
 ENV SERVER_NAME=:80
 
+RUN sed  -i \
+    -e 's#root \* public/#root \* /app/public/#g' \
+    /etc/caddy/Caddyfile
+
+RUN cat  /etc/caddy/Caddyfile
+
 # Install build dependencies and PHP extensions in a single layer
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS msmtp && \
     install-php-extensions \
@@ -25,6 +31,11 @@ RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS msmtp && \
     # Clean up
     apk del .build-deps $PHPIZE_DEPS && \
     rm -rf /var/cache/apk/* /tmp/*
+
+
+
+RUN cp $PHP_INI_DIR/php.ini-development $PHP_INI_DIR/php.ini
+
 
 # Set permissions for install-php-extensions
 RUN chmod uga+x /usr/local/bin/install-php-extensions && sync
